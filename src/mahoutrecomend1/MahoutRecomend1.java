@@ -26,18 +26,21 @@ public class MahoutRecomend1 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        System.out.println("Starting the Recomender ...");
         try {
             DataModel model =
                     new FileDataModel(new File("intro.csv"));
+            
             UserSimilarity similarity =
                     new PearsonCorrelationSimilarity(model);
             UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, model);
             Recommender recommender = new GenericUserBasedRecommender(
                     model, neighborhood, similarity);
+            long userId = 1;
             List<RecommendedItem> recommendations =
-                    recommender.recommend(1, 2);
+                    recommender.recommend(userId, 2);
             for (RecommendedItem recommendation : recommendations) {
-                System.out.println(recommendation);
+                System.out.println("UserID[" + userId + "] would like: " +recommendation);
             }
         } catch (IOException ex) {
             Logger.getLogger(MahoutRecomend1.class.getName()).log(Level.SEVERE, null, ex);
