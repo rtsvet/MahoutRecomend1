@@ -9,11 +9,16 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.knn.KnnItemBasedRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.knn.NonNegativeQuadraticOptimizer;
+import org.apache.mahout.cf.taste.impl.recommender.knn.Optimizer;
+import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 /**
@@ -30,17 +35,24 @@ public class MahoutRecomend1 {
         try {
             DataModel model =
                     new FileDataModel(new File("intro.csv"));
-            
-            UserSimilarity similarity =
-                    new PearsonCorrelationSimilarity(model);
-            UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, model);
-            Recommender recommender = new GenericUserBasedRecommender(
-                    model, neighborhood, similarity);
+            /*
+             UserSimilarity similarity =
+             new PearsonCorrelationSimilarity(model);
+             UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, model);
+             Recommender recommender = new GenericUserBasedRecommender(
+             model, neighborhood, similarity);
+             */
+            // Item similarity
+            ItemSimilarity similarity = new LogLikelihoodSimilarity(model);
+            Optimizer optimizer = new NonNegativeQuadraticOptimizer();
+            Recommender recommender = new KnnItemBasedRecommender(model, similarity, optimizer, 1);
+
+
             long userId = 1;
             List<RecommendedItem> recommendations =
                     recommender.recommend(userId, 2);
             for (RecommendedItem recommendation : recommendations) {
-                System.out.println("UserID[" + userId + "] would like: " +recommendation);
+                System.out.println("UserID[" + userId + "] would like: " + recommendation);
             }
         } catch (IOException ex) {
             Logger.getLogger(MahoutRecomend1.class.getName()).log(Level.SEVERE, null, ex);
@@ -48,5 +60,4 @@ public class MahoutRecomend1 {
             Logger.getLogger(MahoutRecomend1.class.getName()).log(Level.SEVERE, null, tex);
         }
     }
-    
 }
